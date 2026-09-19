@@ -1,0 +1,38 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@lts
+          cache: true
+        
+      - name: ⚡ Build and compile
+        run: node --run compile
+
+      - name: 📝 Create release notes
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node --run release:github
+        
+      - name: 📤 Publish assets
+        uses: softprops/action-gh-release@v3
+        with:
+          files: pkg/*.exe
+          fail_on_unmatched_files: true

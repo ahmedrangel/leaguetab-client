@@ -1,0 +1,26 @@
+import resedit from "resedit-cli";
+import pkg from "../package.json" with { type: "json" };
+
+const owner = "JimTracker";
+const path = "./pkg/leaguetab-client.exe";
+const iconPath = "./assets/favicon.ico";
+const version = pkg.version;
+
+const lang = 1033; // en-US
+
+await resedit({
+  in: path,
+  out: path,
+  definition: {
+    lang,
+    icons: [{ id: 1, sourceFile: iconPath }],
+    version: {
+      productName: `${owner} LeagueTab Client`,
+      fileDescription: pkg.description,
+      fileVersion: `${version}.0`,
+      productVersion: version,
+      companyName: owner,
+      legalCopyright: `© ${new Date().getFullYear()} ${owner}`
+    }
+  }
+});
