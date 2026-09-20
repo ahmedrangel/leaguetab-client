@@ -14,7 +14,7 @@ const router = AutoRouter({
 });
 
 router.get("/", async () => {
-  const league = new LeagueService();
+  const league = await LeagueService.getInstance();
   const data = await league.gameData();
   return json(data);
 });

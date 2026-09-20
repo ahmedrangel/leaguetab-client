@@ -10,7 +10,7 @@ export class Server {
 
     // Send the game data each second if game is started
     setInterval(async () => {
-      const league = await new LeagueService();
+      const league = await LeagueService.getInstance();
       const data = await league.gameData();
       for (const client of this.ws?.clients || []) {
         if (client.readyState === client.OPEN) {

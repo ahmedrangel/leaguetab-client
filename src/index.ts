@@ -39,7 +39,8 @@ const main = defineCommand({
           await updateApp();
         }
       }
-      await new LeagueService().init();
+      const league = await LeagueService.getInstance();
+      await league.init();
       const { id: userId, accessToken } = await twitchAuth();
       const port = 31537;
       await runHttp({ port });

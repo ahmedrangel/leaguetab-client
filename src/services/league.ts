@@ -9,21 +9,29 @@ export default class LeagueService {
   private readonly lol = new LolApi();
   private readonly client = new HasagiClient();
   private readonly ddragonCdn = "http://ddragon.leagueoflegends.com/cdn";
-  private initialized = false;
-  private gameStarted = false;
   private version!: string;
   private region!: LolL10nRegionLocale;
   private champs!: Awaited<ReturnType<typeof this.lol.DataDragon.getChampionList>>;
   private items!: Awaited<ReturnType<typeof this.lol.DataDragon.getItemList>>;
   private runes!: Awaited<ReturnType<typeof this.lol.DataDragon.getRunesReforged>>;
   private summonerSpells!: { data: Record<string, { id: string, name: string, image: { full: string } }> };
+  private initialized: boolean;
+  private gameStarted: boolean;
+  private static instance: LeagueService | null = null;
 
   constructor () {
     this.initialized = false;
     this.gameStarted = false;
   }
+  public static async getInstance () {
+    if (!LeagueService.instance) {
+      LeagueService.instance = new LeagueService();
+      await LeagueService.instance.init();
+    }
+    return LeagueService.instance;
+  }
 
-  async init () {
+  private async init () {
     consola.start("Initializing League Service...");
     if (this.initialized) {
       consola.success("League Service already initialized.");
