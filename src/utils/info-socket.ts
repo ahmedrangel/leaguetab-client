@@ -18,7 +18,7 @@ export class Server {
           else if (this.lastGameStarted !== data.gameStarted) client.send(JSON.stringify({ type: "gameData", data }));
         }
       }
-      this.lastGameStarted = data.gameStarted;
+      this.lastGameStarted = data.gameStarted || null;
     }, 1000);
   }
 }
