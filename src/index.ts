@@ -42,8 +42,8 @@ const main = defineCommand({
       const server = await runHttp({ port });
       const url = await startCloudflared({ port });
       await Promise.all([
-        lolScoreboardSync({ url, dev: args.dev }),
-        twitchAuth({ dev: args.dev })
+        lolScoreboardSync(),
+        twitchAuth({ url, dev: args.dev })
       ]);
       await LeagueService.getInstance();
       runWebSocket({ server });

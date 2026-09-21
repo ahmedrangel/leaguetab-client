@@ -6,7 +6,7 @@ import { ErrorCode } from "../utils/errors.ts";
 import LeagueService from "./league.ts";
 
 // oxlint-disable-next-line import/no-mutable-exports
-export let session = "";
+export let verified = false;
 
 const { preflight, corsify } = cors({ origin: "*" });
 
@@ -22,12 +22,9 @@ router.get("/", async () => {
   return json(data);
 });
 
-router.post("/auth/session", async (req) => {
-  const { session: newSession } = await req.json();
-  if (!newSession) return json({ error: "Session is required" }, { status: ErrorCode.BAD_REQUEST });
-  const base64Decoded = Buffer.from(newSession, "base64").toString("utf-8");
-  session = base64Decoded;
-  return json({ success: true });
+router.post("/verify", async () => {
+  verified = true;
+  return json({ verified });
 });
 
 router.all("*", async () => json({ error: "Not Found" }, { status: ErrorCode.NOT_FOUND }));
