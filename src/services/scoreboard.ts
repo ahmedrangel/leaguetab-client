@@ -6,7 +6,7 @@ export const lolScoreboardSync = async () => {
   const startTime = Date.now();
   while (Date.now() - startTime < maxTime) {
     if (verified) {
-      consola.success("Verified with the server.");
+      consola.success("Verified with the authentication server.");
       return;
     }
     await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds before checking again
