@@ -6,7 +6,7 @@ import { runHttp } from "./services/http.ts";
 import { startCloudflared } from "./lib/cloudflared.ts";
 import { twitchAuth } from "./services/twitch.ts";
 import LeagueService from "./services/league.ts";
-import { leagueTabSync } from "./services/leaguetab.ts";
+import { lolScoreboardSync } from "./services/scoreboard.ts";
 
 const main = defineCommand({
   meta: {
@@ -44,7 +44,7 @@ const main = defineCommand({
       const port = 31537;
       await runHttp({ port });
       const url = await startCloudflared({ port });
-      await leagueTabSync({ id: userId, accessToken, url, dev: args.dev });
+      await lolScoreboardSync({ id: userId, accessToken, url, dev: args.dev });
       consola.success("Setup complete");
     }
     catch (err) {

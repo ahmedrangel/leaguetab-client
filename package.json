@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "leaguetab-client",
+  "name": "lolscoreboard-client",
   "version": "0.0.0",
   "description": "",
   "type": "module",
@@ -22,19 +22,19 @@
       "url": "https://yizack.com"
     }
   ],
-  "homepage": "https://github.com/JimRsng/leaguetab-client",
+  "homepage": "https://github.com/JimRsng/lolscoreboard-client",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JimRsng/leaguetab-client.git"
+    "url": "git+https://github.com/JimRsng/lolscoreboard-client.git"
   },
-  "bugs": "https://github.com/JimRsng/leaguetab-client/issues",
+  "bugs": "https://github.com/JimRsng/lolscoreboard-client/issues",
   "scripts": {
     "dev": "node src/index.ts --dev",
     "start": "node src/index.ts",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "build": "obuild",
-    "compile": "obuild && pkg dist/index.mjs -t node24-win-x64 -o pkg/leaguetab-client.exe -C Zstd && node scripts/metadata.ts",
+    "compile": "obuild && pkg dist/index.mjs -t node24-win-x64 -o pkg/lolscoreboard-client.exe -C Zstd && node scripts/metadata.ts",
     "test:types": "tsc --noEmit",
     "checks": "node --run lint && node --run test:types && node --run build",
     "release": "node --run checks && changelogen --release --no-github && git push --follow-tags",

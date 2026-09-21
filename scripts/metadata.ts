@@ -2,7 +2,7 @@ import resedit from "resedit-cli";
 import pkg from "../package.json" with { type: "json" };
 
 const owner = "JimTracker";
-const path = "./pkg/leaguetab-client.exe";
+const path = "./pkg/lolscoreboard-client.exe";
 const iconPath = "./assets/favicon.ico";
 const version = pkg.version;
 
@@ -15,7 +15,7 @@ await resedit({
     lang,
     icons: [{ id: 1, sourceFile: iconPath }],
     version: {
-      productName: `${owner} LeagueTab Client`,
+      productName: `${owner} LoL Scoreboard Client`,
       fileDescription: pkg.description,
       fileVersion: `${version}.0`,
       productVersion: version,
