@@ -45,8 +45,6 @@
     "@hasagi/core": "^0.10.0",
     "@hasagi/ingame-api": "^0.2.2",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@twurple/api": "^8.2.0",
-    "@twurple/auth": "^8.2.0",
     "@types/node": "^26.5.1",
     "@types/ws": "^8.18.1",
     "@whatwg-node/server": "^0.11.0",

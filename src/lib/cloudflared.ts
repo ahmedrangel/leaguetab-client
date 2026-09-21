@@ -27,19 +27,24 @@ export const startCloudflared = async (options: CloudflaredOptions) => {
     child.stderr.on("data", (data: Buffer) => {
       const output = data.toString();
       const quickTunnel = output.match(/https:\/\/[a-zA-Z0-9-]+\.trycloudflare\.com/);
+      const hostname = output.match(/\\"hostname\\":\\"([^"]+)\\"/);
+      const isRegistered = output.includes("Registered tunnel connection");
+      const failed = output.includes("failed with status");
       if (quickTunnel?.length && !resolved) {
         url = quickTunnel[0];
         return;
       }
-      const hostname = output.match(/\\"hostname\\":\\"([^"]+)\\"/);
       if (hostname) {
         url = `https://${hostname[1]}`;
         return;
       }
-      const isRegistered = output.includes("Registered tunnel connection");
       if (isRegistered && !resolved && url) {
         resolved = true;
         resolve(url);
+        return;
+      }
+      if (failed && !resolved) {
+        reject(new Error(output));
         return;
       }
     });

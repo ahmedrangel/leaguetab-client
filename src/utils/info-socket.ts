@@ -7,7 +7,6 @@ export class Server {
 
   constructor (options: { ws?: ServerOptions } = {}) {
     this.ws = options.ws ? new WebSocketServer(options.ws) : null;
-
     // Send the game data each second if game is started
     setInterval(async () => {
       const league = await LeagueService.getInstance();

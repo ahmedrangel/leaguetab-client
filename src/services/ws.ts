@@ -1,10 +1,11 @@
 import type { Server } from "node:http";
 import { parseURL } from "ufo";
 import { Server as InfoServer } from "../utils/info-socket.ts";
-
-export const infoSocket = new InfoServer({ ws: { noServer: true } });
+import consola from "consola";
 
 export const runWebSocket = ({ server }: { server: Server }) => {
+  consola.ready("WebSocket server ready");
+  const infoSocket = new InfoServer({ ws: { noServer: true } });
   server.on("upgrade", (request, socket, head) => {
     const { pathname } = parseURL(request.url);
     switch (pathname) {
