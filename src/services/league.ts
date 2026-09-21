@@ -81,8 +81,12 @@ export default class LeagueService {
 
     return {
       game: {
+        version: this.version,
         started: players.length ? true : this.gameStarted,
         dragonSoul: eventsData?.Events?.filter(event => event.EventName === "DragonKill")?.[2]?.DragonType || null
+      },
+      resources: {
+        cdn: this.ddragonCdn
       },
       teams,
       players
@@ -123,7 +127,7 @@ export default class LeagueService {
       return {
         champion: {
           displayName: player.championName,
-          iconURL: champion ? this.getChampionIcon(champion.image.full) : ""
+          iconURL: champion ? champion.image.full : ""
         },
         isDead: player.isDead,
         level: player.level,
@@ -141,31 +145,31 @@ export default class LeagueService {
             displayName: item.displayName,
             slot: item.slot,
             count: item.count,
-            iconURL: itemData ? this.getItemIcon(itemData.image.full) : ""
+            iconURL: itemData ? itemData.image.full : ""
           };
         }),
         summonerSpells: {
           summonerSpellOne: {
             displayName: player.summonerSpells.summonerSpellOne.displayName,
-            iconURL: spellOne ? this.getSummonerSpellIcon(spellOne.image.full) : ""
+            iconURL: spellOne ? spellOne.image.full : ""
           },
           summonerSpellTwo: {
             displayName: player.summonerSpells.summonerSpellTwo.displayName,
-            iconURL: spellTwo ? this.getSummonerSpellIcon(spellTwo.image.full) : ""
+            iconURL: spellTwo ? spellTwo.image.full : ""
           }
         },
         runes: {
           keystone: {
             displayName: player.runes.keystone.displayName,
-            iconURL: keystoneIcon ? this.getRuneIcon(keystoneIcon) : ""
+            iconURL: keystoneIcon ? keystoneIcon : ""
           },
           primaryRuneTree: {
             displayName: player.runes.primaryRuneTree.displayName,
-            iconURL: primaryRuneTreeIcon ? this.getRuneIcon(primaryRuneTreeIcon) : ""
+            iconURL: primaryRuneTreeIcon ? primaryRuneTreeIcon : ""
           },
           secondaryRuneTree: {
             displayName: player.runes.secondaryRuneTree.displayName,
-            iconURL: secondaryRuneTreeIcon ? this.getRuneIcon(secondaryRuneTreeIcon) : ""
+            iconURL: secondaryRuneTreeIcon ? secondaryRuneTreeIcon : ""
           }
         }
       };
@@ -265,9 +269,4 @@ export default class LeagueService {
       }
     };
   }
-
-  private getChampionIcon = (file: string) => `${this.ddragonCdn}/${this.version}/img/champion/${file}`;
-  private getSummonerSpellIcon = (file: string) => `${this.ddragonCdn}/${this.version}/img/spell/${file}`;
-  private getItemIcon = (file: string) => `${this.ddragonCdn}/${this.version}/img/item/${file}`;
-  private getRuneIcon = (file: string) => `${this.ddragonCdn}/img/${file}`;
 }
