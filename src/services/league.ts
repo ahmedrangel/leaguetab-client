@@ -76,10 +76,14 @@ export default class LeagueService {
       return { gameStarted: false, teams: this.emptyTeams(), players: [] };
     }
     const players = await this.getPlayersData();
-    const teams = await this.teamData(players);
+    const eventsData = await IngameAPI.getEvents().catch(() => null);
+    const teams = await this.teamData(players, eventsData);
 
     return {
-      gameStarted: players.length ? true : this.gameStarted,
+      game: {
+        started: players.length ? true : this.gameStarted,
+        dragonSoul: eventsData?.Events?.filter(event => event.EventName === "DragonKill")?.[2]?.DragonType || null
+      },
       teams,
       players
     };
@@ -172,9 +176,8 @@ export default class LeagueService {
     return playerList.find(player => player.riotIdGameName === eventPlayerName || player.summonerName === eventPlayerName)?.team || null;
   }
 
-  private async teamData (playerList: Awaited<ReturnType<typeof this.getPlayersData>>) {
-    const eventsData = await IngameAPI.getEvents().catch(() => null);
-    const events = eventsData?.Events || [];
+  private async teamData (playerList: Awaited<ReturnType<typeof this.getPlayersData>>, events: Awaited<ReturnType<typeof IngameAPI.getEvents>>) {
+    const eventsData = events?.Events || [];
     const teams = this.emptyTeams();
 
     for (const player of playerList) {
@@ -186,8 +189,8 @@ export default class LeagueService {
       }
     }
 
-    if (events.length) {
-      for (const event of events) {
+    if (eventsData.length) {
+      for (const event of eventsData) {
         switch (event.EventName) {
           case "DragonKill": {
             const killerName = event.KillerName;
