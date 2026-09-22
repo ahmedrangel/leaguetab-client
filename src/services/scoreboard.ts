@@ -11,6 +11,5 @@ export const lolScoreboardSync = async () => {
     }
     await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds before checking again
   }
-  consola.error("Authentication timed out.");
-  process.exit(0);
+  throw new Error("Authentication timed out.");
 };

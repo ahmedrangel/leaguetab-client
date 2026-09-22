@@ -25,6 +25,5 @@ export const runWebSocket = ({ server }: { server: Server }) => {
       client.close();
     }
     infoSocket.ws?.close();
-    process.exit(0);
   });
 };
