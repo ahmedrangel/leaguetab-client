@@ -23,6 +23,7 @@ export const runtime = {
   port: 31537,
   session: {
     state: randomUUID(),
+    sid: null,
     verified: false,
     user: null as { id: string, login: string, displayName: string } | null
   }

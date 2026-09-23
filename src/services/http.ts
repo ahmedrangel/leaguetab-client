@@ -23,6 +23,12 @@ router.get("/", async () => {
 
 router.post("/verify", async (req) => {
   const { sid } = await req.json();
+  if (runtime.session.verified) {
+    if (runtime.session.sid !== sid) {
+      return json({ error: "Session ID mismatch" }, { status: ErrorCode.UNAUTHORIZED });
+    }
+    return json({ verified: runtime.session.verified, user: runtime.session.user });
+  }
   const baseURL = getAPIBaseURL();
   const response = await $fetch<{ verified: boolean, user: { id: string, login: string, displayName: string } }>(`${baseURL}/verify`, {
     method: "POST",
@@ -30,6 +36,7 @@ router.post("/verify", async (req) => {
   }).catch(() => null);
   runtime.session.verified = response?.verified ?? false;
   runtime.session.user = response?.user ?? null;
+  runtime.session.sid = sid;
   return json({ verified: runtime.session.verified, user: runtime.session.user });
 });
 
