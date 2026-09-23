@@ -8,7 +8,7 @@ export const twitchAuth = async ({ url }: { url: string }) => {
   const baseURL = getAPIBaseURL();
   const authURL = withQuery(`${baseURL}/twitch`, {
     url,
-    state: runtime.state
+    state: runtime.session.state
   });
   const opened = await open(authURL);
   if (!opened) {

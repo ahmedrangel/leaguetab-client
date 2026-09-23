@@ -7,9 +7,6 @@ import { ErrorCode } from "../utils/errors.ts";
 import LeagueService from "./league.ts";
 import { getAPIBaseURL, runtime } from "../utils/app.ts";
 
-// oxlint-disable-next-line import/no-mutable-exports
-export let verified = false;
-
 const { preflight, corsify } = cors({ origin: "*", allowMethods: ["GET", "POST"] });
 
 const router = AutoRouter({
@@ -27,12 +24,13 @@ router.get("/", async () => {
 router.post("/verify", async (req) => {
   const { sid } = await req.json();
   const baseURL = getAPIBaseURL();
-  const response = await $fetch<{ verified: boolean }>(`${baseURL}/verify`, {
+  const response = await $fetch<{ verified: boolean, user: { id: string, login: string, displayName: string } }>(`${baseURL}/verify`, {
     method: "POST",
-    body: { sid, state: runtime.state }
+    body: { sid, state: runtime.session.state }
   }).catch(() => null);
-  verified = response?.verified ?? false;
-  return json({ verified });
+  runtime.session.verified = response?.verified ?? false;
+  runtime.session.user = response?.user ?? null;
+  return json({ verified: runtime.session.verified, user: runtime.session.user });
 });
 
 router.all("*", async () => json({ error: "Not Found" }, { status: ErrorCode.NOT_FOUND }));

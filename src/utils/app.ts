@@ -21,7 +21,11 @@ export const APP = {
 export const runtime = {
   dev: false,
   port: 31537,
-  state: randomUUID()
+  session: {
+    state: randomUUID(),
+    verified: false,
+    user: null as { id: string, login: string, displayName: string } | null
+  }
 };
 
 export const getAPIBaseURL = () => runtime.dev ? "http://localhost:5173/api" : "https://lolscoreboard.ahmedrangel.com/api";
