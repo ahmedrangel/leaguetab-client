@@ -47,7 +47,7 @@ const main = defineCommand({
       ]);
       await LeagueService.getInstance();
       runWebSocket({ server });
-      consola.success("Setup complete");
+      consola.success("Setup complete. Please keep this terminal open to maintain the services running.");
     }
     catch (err) {
       consola.error(err);
