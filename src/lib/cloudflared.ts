@@ -4,13 +4,9 @@ import { install } from "cloudflared";
 import { consola } from "consola";
 import { Workspace } from "../utils/workspace.ts";
 import { existsSync } from "node:fs";
+import { runtime } from "../utils/app.ts";
 
-export interface CloudflaredOptions {
-  token?: string;
-  port?: number;
-}
-
-export const startCloudflared = async (options: CloudflaredOptions) => {
+export const startCloudflared = async () => {
   consola.start("Starting Cloudflare Tunnel...");
   const isWindows = process.platform === "win32";
 
@@ -20,7 +16,7 @@ export const startCloudflared = async (options: CloudflaredOptions) => {
   }
 
   spawn(cloudflaredBin, ["--version"], { stdio: "pipe", shell: false }).stdout.on("data", (data: Buffer) => consola.info(data.toString().replace(/\r?\n$/, "")));
-  const child = spawn(cloudflaredBin, ["tunnel", "--url", `http://127.0.0.1:${options.port}`], { stdio: ["ignore", "pipe", "pipe"], shell: false });
+  const child = spawn(cloudflaredBin, ["tunnel", "--url", `http://localhost:${runtime.port}`], { stdio: ["ignore", "pipe", "pipe"], shell: false });
   const url = await new Promise<string>((resolve, reject) => {
     let resolved = false;
     let url = "";

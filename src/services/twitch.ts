@@ -1,11 +1,14 @@
 import consola from "consola";
 import open from "tiny-open";
 import { withQuery } from "ufo";
+import { getAPIBaseURL, runtime } from "../utils/app.ts";
 
-export const twitchAuth = async ({ url, dev }: { url: string, dev?: boolean }) => {
+export const twitchAuth = async ({ url }: { url: string }) => {
   consola.start("Opening your browser to authenticate with Twitch...");
-  const authURL = withQuery(dev ? "http://localhost:5173/api/twitch" : "https://lolscoreboard.ahmedrangel.com/api/twitch", {
-    url
+  const baseURL = getAPIBaseURL();
+  const authURL = withQuery(`${baseURL}/twitch`, {
+    url,
+    state: runtime.state
   });
   const opened = await open(authURL);
   if (!opened) {

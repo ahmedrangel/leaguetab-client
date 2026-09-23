@@ -8,7 +8,7 @@ import consola from "consola";
 export default class LeagueService {
   private readonly lol = new LolApi();
   private readonly client = new HasagiClient();
-  private readonly ddragonCdn = "http://ddragon.leagueoflegends.com/cdn";
+  private readonly ddragonCdn = "https://ddragon.leagueoflegends.com/cdn";
   private version!: string;
   private region!: LolL10nRegionLocale;
   private champs!: Awaited<ReturnType<typeof this.lol.DataDragon.getChampionList>>;

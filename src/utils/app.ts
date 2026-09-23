@@ -4,9 +4,10 @@ import { writeFile } from "node:fs/promises";
 import { $fetch } from "ofetch";
 import { consola } from "consola";
 import { colors } from "consola/utils";
+import { install as installCloudflared } from "cloudflared";
+import { randomUUID } from "node:crypto";
 import { Workspace } from "./workspace.ts";
 import pkg from "../../package.json" with { type: "json" };
-import { install as installCloudflared } from "cloudflared";
 
 export const APP = {
   name: pkg.name,
@@ -16,6 +17,14 @@ export const APP = {
     name: pkg.name
   }
 };
+
+export const runtime = {
+  dev: false,
+  port: 31537,
+  state: randomUUID()
+};
+
+export const getAPIBaseURL = () => runtime.dev ? "http://localhost:5173/api" : "https://lolscoreboard.ahmedrangel.com/api";
 
 export const checkForUpdates = async () => {
   const slug = `${APP.repository.owner}/${APP.repository.name}`;

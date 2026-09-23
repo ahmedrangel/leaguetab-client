@@ -1,13 +1,13 @@
 import { defineCommand, runMain } from "citty";
 import { consola } from "consola";
-import { Workspace } from "./utils/workspace.ts";
-import { APP, checkForUpdates } from "./utils/app.ts";
+import { APP, checkForUpdates, runtime } from "./utils/app.ts";
 import { runHttp } from "./services/http.ts";
 import { startCloudflared } from "./lib/cloudflared.ts";
 import { twitchAuth } from "./services/twitch.ts";
 import { lolScoreboardSync } from "./services/scoreboard.ts";
 import { runWebSocket } from "./services/ws.ts";
 import LeagueService from "./services/league.ts";
+import { Workspace } from "./utils/workspace.ts";
 
 const main = defineCommand({
   meta: {
@@ -22,10 +22,11 @@ const main = defineCommand({
     }
   },
   async run ({ args }) {
+    runtime.dev = args.dev === true;
     consola.info(`Running ${APP.name} v${APP.version}`);
     try {
       await Workspace.setup(APP.name);
-      if (!args.dev) {
+      if (!runtime.dev) {
         const { isUpdateAvailable, updateApp } = await checkForUpdates();
         if (isUpdateAvailable && (await consola.prompt("¿Desea actualizar a la última versión?", {
           type: "select",
@@ -38,12 +39,11 @@ const main = defineCommand({
           await updateApp();
         }
       }
-      const port = 31537;
-      const server = await runHttp({ port });
-      const url = await startCloudflared({ port });
+      const server = await runHttp();
+      const url = await startCloudflared();
       await Promise.all([
         lolScoreboardSync(),
-        twitchAuth({ url, dev: args.dev })
+        twitchAuth({ url })
       ]);
       await LeagueService.getInstance();
       runWebSocket({ server });
