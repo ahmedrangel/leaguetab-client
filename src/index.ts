@@ -8,6 +8,7 @@ import { lolScoreboardSync } from "./services/scoreboard.ts";
 import { runWebSocket } from "./services/ws.ts";
 import LeagueService from "./services/league.ts";
 import { Workspace } from "./utils/workspace.ts";
+import { pressAnyKey } from "./utils/press-any-key.ts";
 
 const main = defineCommand({
   meta: {
@@ -51,6 +52,9 @@ const main = defineCommand({
     }
     catch (err) {
       consola.error(err);
+      consola.box("An error occurred. Press any key to exit.");
+      await pressAnyKey();
+      process.exit(1);
     }
   }
 });
