@@ -29,6 +29,7 @@ public static class LeaguetabConsoleWindow {
     }
     if (${nCmdShow} -eq ${SW_RESTORE}) {
       [void][LeaguetabConsoleWindow]::ShowWindowAsync($console, ${SW_MINIMIZE})
+      Start-Sleep -Milliseconds 1
       [void][LeaguetabConsoleWindow]::ShowWindowAsync($console, ${nCmdShow})
     }
   }
