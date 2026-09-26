@@ -4,6 +4,7 @@ import { LolApi } from "twisted";
 import { $fetch } from "ofetch";
 import type { LolL10nRegionLocale } from "@hasagi/core/types";
 import consola from "consola";
+import { hideCmd } from "../utils/cmd";
 
 export default class LeagueService {
   private readonly lol = new LolApi();
@@ -17,6 +18,9 @@ export default class LeagueService {
   private summonerSpells!: { data: Record<string, { id: string, name: string, image: { full: string } }> };
   private initialized: boolean;
   private gameStarted: boolean;
+  private lastVersionCheck = 0;
+  private versionRefresh: Promise<void> | null = null;
+  private readonly versionCheckInterval = 10 * 60 * 1000;
   private static instance: LeagueService | null = null;
 
   constructor () {
@@ -24,11 +28,11 @@ export default class LeagueService {
     this.gameStarted = false;
   }
   public static async getInstance () {
-    if (!LeagueService.instance) {
-      LeagueService.instance = new LeagueService();
-      await LeagueService.instance.init();
+    if (!this.instance) {
+      this.instance = new LeagueService();
+      await this.instance.init();
     }
-    return LeagueService.instance;
+    return this.instance;
   }
 
   private async init () {
@@ -42,39 +46,70 @@ export default class LeagueService {
         maxConnectionAttempts: 3,
         authenticationStrategy: "process"
       });
+      this.client.on("disconnected", () => {
+        this.initialized = false;
+        consola.warn("League of Legends Client disconnected.");
+        LeagueService.instance = null;
+        this.client.removeAllLCUEventListeners();
+      });
       this.client.addLCUEventListener({
         path: "/lol-gameflow/v1/gameflow-phase",
         types: ["Update"],
         callback: event => this.gameStarted = event.data === "InProgress" || event.data === "GameStart"
       });
 
-      this.region = await this.client.request("get", "/riotclient/region-locale");
-      const [versions, champs, items, runes] = await Promise.all([
-        this.lol.DataDragon.getVersions(),
-        this.lol.DataDragon.getChampionList(this.region.locale),
-        this.lol.DataDragon.getItemList(this.region.locale),
-        this.lol.DataDragon.getRunesReforged(this.region.locale)
-      ]);
-
-      this.version = versions[0]!;
-      this.summonerSpells = await $fetch(`${this.ddragonCdn}/${this.version}/data/${this.region.locale}/summoner.json`);
-      this.champs = champs;
-      this.items = items;
-      this.runes = runes;
+      await this.loadDataDragon();
       this.initialized = true;
       consola.success("League Service initialized successfully.");
+      hideCmd();
       return true;
     }
     catch {
       this.initialized = false;
-      throw new Error("Client not available. Please make sure the League of Legends Client is running.");
+      consola.warn("Failed to initialize. Please make sure the League of Legends Client is running. Trying again...");
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await this.init();
     }
+  }
+
+  private async loadDataDragon (version?: string, region?: LolL10nRegionLocale) {
+    const [versions, currentRegion] = await Promise.all([
+      version ? Promise.resolve([version]) : this.lol.DataDragon.getVersions(),
+      region ? Promise.resolve(region) : this.client.request("get", "/riotclient/region-locale")
+    ]);
+    const currentVersion = versions[0];
+    if (!currentVersion) throw new Error("Could not determine the current Data Dragon version.");
+    const [champs, items, runes, summonerSpells] = await Promise.all([
+      this.lol.DataDragon.getChampionList(currentRegion.locale),
+      this.lol.DataDragon.getItemList(currentRegion.locale),
+      this.lol.DataDragon.getRunesReforged(currentRegion.locale),
+      $fetch(`${this.ddragonCdn}/${currentVersion}/data/${currentRegion.locale}/summoner.json`)
+    ]);
+
+    this.version = currentVersion;
+    this.region = currentRegion;
+    this.champs = champs;
+    this.items = items;
+    this.runes = runes;
+    this.summonerSpells = summonerSpells;
   }
 
   async gameData () {
     if (!this.initialized) {
-      return { gameStarted: false, teams: this.emptyTeams(), players: [] };
+      return {
+        game: {
+          version: this.version,
+          started: false,
+          dragonSoul: null
+        },
+        resources: {
+          cdn: this.ddragonCdn
+        },
+        teams: this.emptyTeams(),
+        players: []
+      };
     }
+    await this.refreshDataDragonIfNeeded();
     const players = await this.getPlayersData();
     const eventsData = await IngameAPI.getEvents().catch(() => null);
     const teams = await this.teamData(players, eventsData);
@@ -91,6 +126,35 @@ export default class LeagueService {
       teams,
       players
     };
+  }
+
+  private async refreshDataDragonIfNeeded () {
+    const now = Date.now();
+    if (now - this.lastVersionCheck < this.versionCheckInterval) return;
+    if (this.versionRefresh) return this.versionRefresh;
+
+    this.lastVersionCheck = now;
+    this.versionRefresh = (async () => {
+      try {
+        const [versions, region] = await Promise.all([
+          this.lol.DataDragon.getVersions(),
+          this.client.request("get", "/riotclient/region-locale")
+        ]);
+        const latestVersion = versions[0];
+        if (!latestVersion || (latestVersion === this.version && region.locale === this.region.locale)) return;
+
+        await this.loadDataDragon(latestVersion, region);
+        consola.info(`League data updated to version ${latestVersion} for locale ${region.locale}.`);
+      }
+      catch (error) {
+        consola.warn("Could not check for League data updates:", error);
+      }
+      finally {
+        this.versionRefresh = null;
+      }
+    })();
+
+    await this.versionRefresh;
   }
 
   private async getPlayersData () {
