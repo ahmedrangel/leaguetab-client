@@ -32,7 +32,7 @@ const createWindowsTray = async () => {
     tooltip: metadata.title,
     onSelect ({ rightButton, mouseX, mouseY }) {
       if (rightButton) {
-        const selectedId = menu.showSync(mouseX, mouseY);
+        const selectedId = menu.showSync(mouseX, mouseY - 50);
         switch (selectedId) {
           case 1:
             toggleCmd();
