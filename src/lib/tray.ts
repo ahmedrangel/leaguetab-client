@@ -1,4 +1,4 @@
-import { pkg, platform } from "node:process";
+import { platform } from "node:process";
 import { join } from "node:path";
 import { copyFile } from "node:fs/promises";
 import consola from "consola";
@@ -7,22 +7,28 @@ import metadata from "../utils/metadata.ts";
 import { toggleCmd } from "../utils/cmd.ts";
 import SysTrayModule from "systray2";
 import { Icon, Menu, NotifyIcon } from "not-the-systray";
+import koffi from "koffi";
 
 const iconPath = platform === "win32" ? "assets/lolscoreboard.ico" : "assets/lolscoreboard.png";
+const pkg = process?.pkg;
 
-const createWindowsTray = async () => {
+const createIcon = async () => {
   const dir = pkg ? __dirname : "src";
   const sourcePath = join(dir, iconPath);
   const destinationIcon = join(Workspace.path, iconPath);
-  await copyFile(sourcePath, destinationIcon);
+  await copyFile(sourcePath, destinationIcon).catch(() => null);
+  return destinationIcon;
+};
 
+const createWindowsTray = async () => {
+  const icon = await createIcon();
   const menu = new Menu([
     { id: 1, text: "Show/Hide window" },
     { id: 2, text: "Exit" }
   ]);
 
   const appIcon = new NotifyIcon({
-    icon: Icon.load(destinationIcon, Icon.small),
+    icon: Icon.load(icon, Icon.small),
     tooltip: metadata.title,
     onSelect ({ rightButton, mouseX, mouseY }) {
       if (rightButton) {
@@ -48,14 +54,11 @@ const createWindowsTray = async () => {
 
 const createFallbackTray = async () => {
   const SysTrayConstructor = (SysTrayModule as unknown as { default?: typeof SysTrayModule }).default ?? SysTrayModule;
-  const dir = pkg ? __dirname : "src";
-  const iconDir = join(dir, iconPath);
-  const destinationIcon = join(Workspace.path, iconPath);
-  await copyFile(iconDir, destinationIcon);
+  const icon = await createIcon();
 
   const systray = new SysTrayConstructor({
     menu: {
-      icon: destinationIcon,
+      icon,
       isTemplateIcon: platform === "darwin",
       title: metadata.title,
       tooltip: metadata.title,
@@ -86,7 +89,36 @@ const createFallbackTray = async () => {
   consola.info("System tray initialized (systray2 fallback).");
 };
 
+const enableSystemMenuTheme = () => {
+  if (platform !== "win32") return;
+  try {
+    const kernel32 = koffi.load("kernel32.dll");
+    const LoadLibraryA = kernel32.func("void *__stdcall LoadLibraryA(const char *name)");
+    const GetProcAddress = kernel32.func("void *__stdcall GetProcAddress(void *hModule, void *name)");
+    const hUxtheme = LoadLibraryA("uxtheme.dll");
+    if (!hUxtheme) {
+      return;
+    }
+    const pSetPreferredAppMode = GetProcAddress(hUxtheme, 135);
+    const pFlushMenuThemes = GetProcAddress(hUxtheme, 136);
+    if (!pSetPreferredAppMode || !pFlushMenuThemes) {
+      return;
+    }
+    const SetPreferredAppModeProto = koffi.proto("int __stdcall SetPreferredAppModeProto(int mode)");
+    const FlushMenuThemesProto = koffi.proto("void __stdcall FlushMenuThemesProto()");
+    const AllowDark = 1; // enum PreferredAppMode: Default=0, AllowDark=1, ForceDark=2, ForceLight=3
+    koffi.call(pSetPreferredAppMode, SetPreferredAppModeProto, AllowDark);
+    koffi.call(pFlushMenuThemes, FlushMenuThemesProto);
+  }
+  catch {}
+};
+
 export const createTray = async () => {
-  if (platform === "win32") await createWindowsTray();
-  else await createFallbackTray();
+  if (platform === "win32") {
+    enableSystemMenuTheme();
+    await createWindowsTray();
+  }
+  else {
+    await createFallbackTray();
+  }
 };

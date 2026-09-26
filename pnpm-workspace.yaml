@@ -1,4 +1,6 @@
+minimumReleaseAge: 0
 allowBuilds:
   cloudflared: false
   esbuild: false
-  not-the-systray: true
+  koffi: false
+  not-the-systray: false

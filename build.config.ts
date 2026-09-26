@@ -8,7 +8,7 @@ export default defineBuildConfig({
       minify: true,
       dts: false,
       rolldown: {
-        external: ["not-the-systray"]
+        external: ["not-the-systray", "koffi"]
       }
     }
   ]
