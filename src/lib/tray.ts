@@ -43,7 +43,7 @@ const createWindowsTray = async () => {
     }
   });
 
-  consola.info("System tray initialized successfully (native Windows).");
+  consola.info("System tray initialized (native Windows).");
 };
 
 const createFallbackTray = async () => {
@@ -83,7 +83,7 @@ const createFallbackTray = async () => {
   await systray.ready().catch((error) => {
     consola.error("Failed to initialize system tray:", error);
   });
-  consola.info("System tray initialized successfully (systray2 fallback).");
+  consola.info("System tray initialized (systray2 fallback).");
 };
 
 export const createTray = async () => {
