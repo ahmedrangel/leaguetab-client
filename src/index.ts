@@ -22,6 +22,12 @@ const main = defineCommand({
       type: "boolean",
       description: "Run in development mode",
       required: false
+    },
+    tunnel: {
+      type: "boolean",
+      description: "Enable the cloudflared tunnel",
+      required: false,
+      default: true
     }
   },
   async run ({ args }) {
@@ -44,7 +50,7 @@ const main = defineCommand({
         }
       }
       const server = await runHttp();
-      const url = await startCloudflared();
+      const url = args.tunnel ? await startCloudflared() : "test";
       await Promise.all([
         lolScoreboardSync(),
         twitchAuth({ url })
