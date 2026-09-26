@@ -4,7 +4,7 @@ import { LolApi } from "twisted";
 import { $fetch } from "ofetch";
 import type { LolL10nRegionLocale } from "@hasagi/core/types";
 import consola from "consola";
-import { hideCmd } from "../utils/cmd";
+import { hideCmd } from "../utils/cmd.ts";
 
 export default class LeagueService {
   private readonly lol = new LolApi();
