@@ -18,11 +18,11 @@ export class Server {
       this.lastGameData = data;
       for (const client of this.ws?.clients || []) {
         if (client.readyState === client.OPEN) {
-          if (data.gameStarted) client.send(JSON.stringify({ type: "gameData", data }));
-          else if (this.lastGameStarted !== data.gameStarted) client.send(JSON.stringify({ type: "gameData", data }));
+          if (data.game.started) client.send(JSON.stringify({ type: "gameData", data }));
+          else if (this.lastGameStarted !== data.game.started) client.send(JSON.stringify({ type: "gameData", data }));
         }
       }
-      this.lastGameStarted = data.gameStarted || null;
+      this.lastGameStarted = data.game?.started || null;
     }, 1000);
   }
 }
