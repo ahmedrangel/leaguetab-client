@@ -1,3 +1,4 @@
 allowBuilds:
   cloudflared: false
   esbuild: false
+  not-the-systray: true

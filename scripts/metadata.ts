@@ -1,7 +1,7 @@
 import resedit from "resedit-cli";
 import pkg from "../package.json" with { type: "json" };
 
-const owner = "JimTracker";
+const owner = "ahmedrangel";
 const path = "./pkg/lolscoreboard-client.exe";
 // const iconPath = "./assets/favicon.ico";
 const version = pkg.version;

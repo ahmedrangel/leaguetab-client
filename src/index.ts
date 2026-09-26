@@ -9,6 +9,8 @@ import { runWebSocket } from "./services/ws.ts";
 import LeagueService from "./services/league.ts";
 import { Workspace } from "./utils/workspace.ts";
 import { pressAnyKey } from "./utils/press-any-key.ts";
+import { createTray } from "./lib/tray.ts";
+import { hideCmd } from "./utils/cmd.ts";
 
 const main = defineCommand({
   meta: {
@@ -27,6 +29,7 @@ const main = defineCommand({
     consola.info(`Running ${APP.name} v${APP.version}`);
     try {
       await Workspace.setup(APP.name);
+      await createTray();
       if (!runtime.dev) {
         const { isUpdateAvailable, updateApp } = await checkForUpdates();
         if (isUpdateAvailable && (await consola.prompt("¿Desea actualizar a la última versión?", {
@@ -48,7 +51,8 @@ const main = defineCommand({
       ]);
       await LeagueService.getInstance();
       runWebSocket({ server });
-      consola.success("Setup complete. Please keep this terminal open to maintain the services running.");
+      consola.success("Setup complete. Please keep this app running to maintain the services live.");
+      hideCmd();
     }
     catch (err) {
       consola.error(err);

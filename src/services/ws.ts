@@ -20,10 +20,14 @@ export const runWebSocket = ({ server }: { server: Server }) => {
         return;
     }
   });
-  process.on("SIGINT", () => {
+
+  const shutdown = () => {
     for (const client of infoSocket.ws?.clients ?? []) {
       client.close();
     }
     infoSocket.ws?.close();
-  });
+    server.close();
+  };
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 };

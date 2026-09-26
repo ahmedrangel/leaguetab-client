@@ -11,6 +11,10 @@ const { preflight, corsify } = cors({ origin: "*", allowMethods: ["GET", "POST"]
 
 const router = AutoRouter({
   before: [preflight],
+  catch: (error) => {
+    consola.error("HTTP error:", error);
+    return json({ error: "Internal Server Error" }, { status: 500 });
+  },
   finally: [corsify]
 });
 
@@ -22,7 +26,9 @@ router.get("/", async () => {
 });
 
 router.post("/verify", async (req) => {
-  const { sid } = await req.json();
+  const body = await req.json().catch(() => null);
+  const { sid } = body ?? {};
+  if (!sid) return json({ error: "Missing session ID" }, { status: ErrorCode.BAD_REQUEST });
   if (runtime.session.verified) {
     if (runtime.session.sid !== sid) {
       return json({ error: "Session ID mismatch" }, { status: ErrorCode.UNAUTHORIZED });

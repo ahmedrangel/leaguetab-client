@@ -6,7 +6,10 @@ export default defineBuildConfig({
       type: "bundle",
       input: "src/index.ts",
       minify: true,
-      dts: false
+      dts: false,
+      rolldown: {
+        external: ["not-the-systray"]
+      }
     }
   ]
 });
